@@ -7,6 +7,8 @@
 - python
 - apt
 - apt-utils
+- sysvinit-core
+- base-files
 - procps
 - net-tools
 - iputils-ping
@@ -52,7 +54,6 @@
 - cpio
 - util-linux
 - dosfstools
-- gnu-fdisk
 - rssh
 - u-boot-tools
 - ntpdate

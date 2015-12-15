@@ -57,6 +57,8 @@
 - u-boot-tools
 - ntpdate
 - onlp
+- onlp-platform
+- onlp-platform-defaults
 - parted
 - watchdog
 - netplug
@@ -67,5 +69,5 @@
 - iptables
 - onl-faultd
 - onl-loader-initscripts
-
+- orc
 

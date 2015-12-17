@@ -1,0 +1,27 @@
+### Commented entries have reasonable defaults.
+### Uncomment to edit them.
+# Source: <source package name; defaults to package name>
+Section: misc
+Priority: optional
+Homepage: https://github.com/facebook/fboss
+Standards-Version: 3.9.2
+
+Package: fboss
+Version: 2.0
+Maintainer: Steven Noble <steven.noble@bigswitch.com>
+Depends: flex, bison, folly, wangle, fbthrift, libboost-all-dev, libdouble-conversion1, libssl1.0.0, libtool, libevent-2.0-5, scons, libsnappy1, libsasl2-2, libnuma1, libi2c-dev, libgflags2, libgoogle-glog0, fboss-py, fboss-core
+# Recommends: <comma-separated list of packages>
+# Suggests: <comma-separated list of packages>
+# Provides: fboss 
+# Replaces: <comma-separated list of packages>
+Architecture: amd64
+# Copyright: <copyright file; defaults to GPL2>
+# Changelog: <changelog file; defaults to a generic changelog>
+# Readme: <README.Debian file; defaults to a generic one>
+# Extra-Files: <comma-separated list of additional files for the doc directory>
+# Files: <pair of space-separated paths; First is file to include, second is destination>
+#  <more pairs, if there's more than one file to include. Notice the starting space>
+Description: <short description; defaults to some wise words> 
+ The Facebook FBOSS forwarding program requires many extra packages including:
+ folly, wangle, fbthrift, google glog and others.  This package installs the base
+ fboss tools along with the required extras.

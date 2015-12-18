@@ -7,9 +7,9 @@ Homepage: https://github.com/facebook/fboss
 Standards-Version: 3.9.2
 
 Package: fboss
-Version: 2.0
+Version: 2.2
 Maintainer: Steven Noble <steven.noble@bigswitch.com>
-Depends: flex, bison, folly, wangle, fbthrift, libboost-all-dev, libdouble-conversion1, libssl1.0.0, libtool, libevent-2.0-5, scons, libsnappy1, libsasl2-2, libnuma1, libi2c-dev, libgflags2, libgoogle-glog0, fboss-py, fboss-core
+Depends: flex, bison, folly, wangle, fbthrift, libboost-filesystem1.55.0, libboost-system1.55.0, libboost-thread1.55.0, libboost-context1.55.0, libboost-program-options1.55.0, libboost-regex1.55.0, libdouble-conversion1, libssl1.0.0, libtool, libevent-2.0-5, scons, libsnappy1, libsasl2-2, libnuma1, libi2c-dev, libgflags2, libgoogle-glog0, fboss-py, fboss-core
 # Recommends: <comma-separated list of packages>
 # Suggests: <comma-separated list of packages>
 # Provides: fboss 

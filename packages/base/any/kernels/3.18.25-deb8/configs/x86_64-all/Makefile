@@ -19,7 +19,7 @@
 # </bsn.cl>
 ############################################################
 #
-# Default 3.16.7-ckt11-1+deb8u6 configuration for x86_64 platforms.
+# Default 3.18.25-deb8 configuration for x86_64 platforms.
 #
 ############################################################
 THIS_DIR := $(abspath $(dir $(lastword $(MAKEFILE_LIST))))
@@ -35,7 +35,7 @@ K_CONFIG := x86_64-all.config
 K_BUILD_TARGET := bzImage
 K_COPY_SRC := arch/x86/boot/bzImage
 ifndef K_COPY_DST
-K_COPY_DST := kernel-3.16-deb8-x86_64-all
+K_COPY_DST := kernel-3.18-deb8-x86_64-all
 endif
 
 include $(ONL)/make/kbuild.mk

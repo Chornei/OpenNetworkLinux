@@ -180,9 +180,9 @@ partition_gpt()
 {
   local start end part
 
-  installer_say "Creating 128MB for Open Network Linux boot"
+  installer_say "Creating 364MB for Open Network Linux boot"
   start=$1; shift
-  end=$(( $start + 128 ))
+  end=$(( $start + 364 ))
   echo "start=$start end=$end"
 
   parted -s $DEV unit mb mkpart "ONL-BOOT" ext4 ${start} ${end} || return 1
@@ -206,11 +206,11 @@ partition_gpt()
   start=$(( $end + 1 ))
 
   installer_say "Allocating remainder for /mnt/flash2"
-  parted -s $DEV unit mb mkpart "FLASH2" fat32 ${start} "100%" || return 1
+  parted -s $DEV unit mb mkpart "FLASH2" ext4 ${start} "100%" || return 1
   if ! part=$(get_part_number $DEV "FLASH2"); then
       return 1
   fi
-  mkfs.vfat -n "FLASH2" ${DEV}${part}
+  mkfs.ext4 -L "FLASH2" ${DEV}${part}
 
   return 0
 }
@@ -240,7 +240,7 @@ installer_standard_gpt_install()
       SWIDST="$(basename ${SWISRC})"
     fi
     installer_say "Installing Open Network Linux Software Image (${SWIDST})..."
-    mount LABEL="FLASH2" "$workdir/mnt"
+    mount LABEL="FLASH2" -t ext4 "$workdir/mnt"
     cp "${SWISRC}" "$workdir/mnt/${SWIDST}"
     umount "$workdir/mnt"
   fi

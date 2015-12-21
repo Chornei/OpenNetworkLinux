@@ -77,15 +77,6 @@ try_mount_block()
     fi
 
     test -d /mnt/$mount || mkdir -p /mnt/$mount
-    if test "$recover" = "fsck"; then
-      if dosfsck -a /dev/$devpart; then
-        :
-      else
-        dosfsck -n /dev/$devpart || return
-      fi
-    else
-      dosfsck -n /dev/$devpart || return
-    fi
     mount -o noatime /dev/$devpart /mnt/$mount || return
     echo "mounted /dev/$devpart --> /mnt/$mount"
 
@@ -106,15 +97,6 @@ try_mount_sysdev()
     fi
 
     test -d /mnt/$mount || mkdir -p /mnt/$mount
-    if test "$recover" = "fsck"; then
-      if dosfsck -a /dev/$devpart; then
-        :
-      else
-        dosfsck -n /dev/$devpart || return
-      fi
-    else
-      dosfsck -n /dev/$devpart || return
-    fi
     mount -o noatime /dev/$devpart /mnt/$mount || return
     echo "mounted /dev/$devpart --> /mnt/$mount"
 

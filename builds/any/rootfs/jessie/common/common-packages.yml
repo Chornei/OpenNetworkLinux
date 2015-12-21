@@ -58,6 +58,8 @@
 - u-boot-tools
 - ntpdate
 - onlp
+- onlp-platform
+- onlp-platform-defaults
 - parted
 - watchdog
 - netplug

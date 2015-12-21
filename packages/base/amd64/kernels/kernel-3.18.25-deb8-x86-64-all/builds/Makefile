@@ -13,7 +13,7 @@ THIS_DIR := $(abspath $(dir $(lastword $(MAKEFILE_LIST))))
 include $(ONL)/make/config.mk
 
 kernel:
-	$(MAKE) -C $(ONL)/packages/base/any/kernels/3.16.7-ckt11-1+deb8u6/configs/x86_64-all K_TARGET_DIR=$(THIS_DIR) -j
+	$(MAKE) -C $(ONL)/packages/base/any/kernels/3.18.25-deb8/configs/x86_64-all K_TARGET_DIR=$(THIS_DIR) -j
 
 clean:
-	rm -rf linux-3.16.7-ckt11-1+deb8u6 linux-3.16.7-ckt11-1+deb8u6-mbuild
+	rm -rf linux-3.18.25-deb8 linux-3.18.25-deb8-mbuild

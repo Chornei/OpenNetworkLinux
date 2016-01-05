@@ -62,7 +62,7 @@ ONL Manual Install
 
 2) Boot switch and choose "ONIE: Rescue" to go to ONIE''s interactive mode
 
-3) From the ONIE# prompt run "install_url http://opennetlinux.org/binaries/latest-wedge.installer"
+3) From the ONIE# prompt run "install_url http://opennetlinux.org/binaries/latest-wedge-2.0.installer"
 
 4) Wait for the install to finish and the system to reboot
 
@@ -73,21 +73,23 @@ password "onl"
 
 7) Configure the ma1 interface either via dhcp (dhclient ma1) or manually
 
-8) From the command prompt you can start fboss by using the command 
+8) run apt-get update; apt-get install fboss to install the fboss software
+
+9) From the command prompt you can start fboss by using the command 
 "service fboss_wedge_agent start"
 
-9) The first time you start the fboss_wedge_agent service it will download 
+10) The first time you start the fboss_wedge_agent service it will download 
 the OpenNSL library from the Broadcom github account.
 
-10) Once the library is installed, fboss_wedge_agent will start, using the
+11) Once the library is installed, fboss_wedge_agent will start, using the
 default configuration located at /etc/fboss/ocp-demo.json
 
-11) You can confirm that the fboss_wedge_agent is running by issuing the
+12) You can confirm that the fboss_wedge_agent is running by issuing the
 command "service fboss_wedge_agent status"
 
-12) If fboss is running, you should see "[ ok ] fboss_wedge_agent is running."
+13) If fboss is running, you should see "[ ok ] fboss_wedge_agent is running."
 
-13) You can now execute the fboss_route.py script and configure the system.
+14) You can now execute the fboss_route.py script and configure the system.
 
 Modifying The fboss_wedge_agent configuration
 ------------------------------------------------
@@ -126,19 +128,66 @@ Now press RETURN here to jump into ONIE''s manual installer mode.  You should se
 
 Then simply download the latest ONL wedge installer from the website and run it.
 
-        ONIE:/ # install_url http://opennetlinux.org/binaries/latest-wedge.installer
+        ONIE:/ # install_url http://opennetlinux.org/binaries/latest-wedge-2.0.installer
 
         Connecting to opennetlinux.org (107.170.237.53:80)
-        Open Network Installer running under ONIE.
-        Installer Version: Open Network Linux 019421c (amd64.all,2015.11.17.06.23,019421c116940d87d5a41100d1b8a64cbba50252)
-        Detected platform: x86-64-accton-wedge-16x-r0
-        Installing in standalone mode.
-        Unpacking Open Network Linux installer files...
-        ...
+        installer: computing checksum
+        installer: checksum is OK
+        installer: invoking installer amd64-installer.sh
+        Open Network Linux installer running under ONIE.
+        Unpacking Open Network Linux installer files......
+        ....
+        Installing boot files...
+        Installing boot-config
+        Installing Open Network Linux Software Image (ONL-2.0.0_ONL-OS_2015-12-19.2121-547e306_AMD64.swi)...
+        Installing kernels
+        Installing GRUB
+        Installing for i386-pc platform.
+        Installation finished. No error reported.
+        Install finished.  Rebooting to Open Network Linux.
 
-        Connecting tty=ttyS1 with /sbin/pgetty
+        ....
 
-        Open Network Linux  019421c (amd64.all,2015.11.17.06.23,019421c116940d87d5a41100d1b8a64cbba50252)
+        Stopping watchdog keepalive daemon....
+        Starting watchdog daemon....
 
-        onl-wedge login:
+        Debian GNU/Linux 8 localhost ttyS1
 
+        localhost login: root
+        Password:
+        Linux localhost 3.18.25-OpenNetworkLinux #1 SMP Tue Jan 5 20:22:47 UTC 2016 x86_64
+        root@localhost:~#
+
+Install FBOSS
+
+        root@localhost:~# apt-get update
+        root@localhost:~# apt-get install fboss
+
+        After this operation, 315 MB of additional disk space will be used.
+        Do you want to continue? [Y/n]
+        WARNING: The following packages cannot be authenticated!
+          folly wangle fbthrift fboss-py fboss-core fboss
+        Install these packages without verification? [y/N] y
+
+Start FBOSS
+
+       root@localhost:~# service fboss_wedge_agent start
+       [....] Starting  Facebook FBOSS agent: fboss_wedge_agent
+       Error: OpenNSL library not found, attempting to grab from GitHub
+       OpenNSL library succesfully installed
+       [ ok --- Loading   linux-kernel-bde   linux-user-bde  ; Creating devices .
+
+       root@localhost:~# service fboss_wedge_agent status
+       [ ok ] fboss_wedge_agent is running.
+
+Run fboss_route.py
+
+       root@localhost:~# fboss_route.py
+       usage: fboss_route.py [-h] [--port PORT] [--client CLIENT] [--host HOST]
+                      {flush,add,delete,list_intf,list_routes,list_optics,list_ports,list_vlans,list_arps}
+
+       root@localhost:~# fboss_route.py list_ports
+       Port 1: PortStatus(enabled=True, up=False):
+       Port 2: PortStatus(enabled=True, up=False):
+       Port 3: PortStatus(enabled=True, up=False):
+       Port 4: PortStatus(enabled=True, up=False):

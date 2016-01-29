@@ -1,4 +1,4 @@
 NETDEV=ma1
 NETAUTO=dhcp
-BOOTMODE=SWI
-SWI=flash2::latest
+BOOTMODE=installed
+SWI=dir:/mnt/flash2/ONL

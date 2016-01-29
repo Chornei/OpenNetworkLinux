@@ -1,0 +1,37 @@
+############################################################
+#
+# Bootmode: installed
+#
+# Boot the installed rootfs from the INSTALLED BOOTPARAM value.
+#
+############################################################
+. /lib/msgs
+. /etc/onl/BOOTPARAMS
+
+
+#
+#
+    mkdir /newroot
+    msg_info "checking if /mnt/flash2/ONL exists"
+
+    if [ ! -d /mnt/flash2/ONL ]; then 
+    msg_info "extracting rootfs to ONL directory"
+    cd /mnt/flash2
+    unzip *.swi
+    unsquashfs -d ONL rootfs-amd64.sqsh
+    msg_info "booting from installed image"
+    mount --bind /mnt/flash2/ONL/ /newroot
+    mkdir -p /newroot/etc/onl
+    cp -R /etc/onl/* /newroot/etc/onl
+    else
+    msg_info "extracted file system already exists"
+    fi
+
+    msg_info "booting from installed image"
+    mount --bind /mnt/flash2/ONL/ /newroot
+
+    if [ -f /etc/fw_env.config ]; then
+    cat /etc/fw_env.config >/newroot/etc/fw_env.config
+    fi
+    timeout -t 60 kill -QUIT 1  && exit 0
+exit 1

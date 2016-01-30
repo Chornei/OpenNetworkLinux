@@ -11,4 +11,4 @@ install:
 - sudo apt-get install -qq realpath
 
 script:
-- tools/autobuild/run.sh -b master
+- tools/autobuild/build.sh 8

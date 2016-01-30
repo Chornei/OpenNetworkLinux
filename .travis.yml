@@ -11,4 +11,4 @@ before_script:
 - sudo apt-get install -qq realpath
 
 script:
-- tools/autobuild/build.sh 8
+- make docker

@@ -1,11 +1,14 @@
 sudo: required
+sudo: required
 
 language: c
 
 services:
   - docker
+  
+install:
+- sudo apt-get update -qq
+- sudo apt-get install -qq realpath
 
 script:
-- docker/tools/onlbuilder
-- source setup.env
-- make onl-x86
+- tools/autobuild/run.sh -b master

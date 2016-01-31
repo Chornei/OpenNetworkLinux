@@ -11,6 +11,7 @@ services:
 before_script:
 - sudo apt-get update -qq
 - sudo apt-get install -qq realpath
+- sudo cp ~/OpenNetworkLinux/docker/tools/onlbuilder /usr/local/bin/onlbuilder
 
 script:
-- make docker
+- tools/autobuild/run.sh -b master

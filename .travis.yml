@@ -3,6 +3,9 @@ sudo: required
 
 language: c
 
+git:
+  submodules: false
+  
 services:
   - docker
   

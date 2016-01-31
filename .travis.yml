@@ -14,4 +14,4 @@ before_script:
 - sudo cp ~/build/sonoble/OpenNetworkLinux/docker/tools/onlbuilder /usr/local/bin/onlbuilder
 
 script:
-- tools/autobuild/run.sh -b master
+- tools/autobuild/run.sh

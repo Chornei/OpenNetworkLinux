@@ -1,0 +1,32 @@
+############################################################
+#
+# ONLP Package Build Template
+#
+# Requires: ARCH, TOOLCHAIN
+#
+############################################################
+variables:
+  libdir: /lib/${TOOLCHAIN}
+  bindir: /bin
+
+common:
+  arch: $ARCH
+  version: 1.0.0
+  copyright: Copyright 2013, 2014, 2015 Big Switch Networks
+  maintainer: support@bigswitch.com
+
+packages:
+  - name: orc
+    version: 1.0.0
+    summary: Open Route Cache
+
+    files:
+      builds/$BUILD_DIR/${TOOLCHAIN}/bin/debug.so : $libdir/
+      builds/$BUILD_DIR/${TOOLCHAIN}/bin/veth.so : $libdir/
+      builds/$BUILD_DIR/${TOOLCHAIN}/bin/orced : $bindir/orc
+
+    changelog:  Change changes changes.,
+
+
+
+

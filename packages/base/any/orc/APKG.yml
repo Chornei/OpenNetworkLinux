@@ -17,6 +17,7 @@ common:
 
 packages:
   - name: orc
+    depends: orc-brcm-6.3.3-release
     version: 1.0.0
     summary: Open Route Cache
 

@@ -12,7 +12,6 @@ before_script:
 - sudo apt-get update -qq
 - sudo apt-get install -qq realpath binfmt-support
 - sudo cp ~/build/sonoble/OpenNetworkLinux/docker/tools/onlbuilder /usr/local/bin/onlbuilder
-- sudo mount binfmt_misc -t binfmt_misc /proc/sys/fs/binfmt_misc
 - sudo /etc/init.d/binfmt-support start
 
 script:

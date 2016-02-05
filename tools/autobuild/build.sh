@@ -70,7 +70,7 @@ echo "Now running under $DOCKER_IMAGE..."
 # This is to normalize environments where the checkout might instead
 # be in a detached head (like jenkins)
 echo "Switching to branch $BUILD_BRANCH..."
-cd $ONL && git checkout $BUILD_BRANCH
+# cd $ONL && git checkout $BUILD_BRANCH
 
 
 #

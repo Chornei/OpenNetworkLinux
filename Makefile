@@ -5,7 +5,9 @@
 ############################################################
 ifneq ($(MAKECMDGOALS),docker)
 
-MAKEFLAGS += --silent
+ifndef VERBOSE
+.SILENT:
+endif
 
 ifndef ONL
 $(error Please source the setup.env script at the root of the ONL tree)

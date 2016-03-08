@@ -80,7 +80,7 @@ Configure:
     - 'netplug defaults'
     - 'watchdog defaults'
     - 'wd_keepalive remove'
-
+    - 'exec-flash defaults'
   options:
     clean: True
     securetty: False

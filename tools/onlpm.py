@@ -201,7 +201,7 @@ class OnlPackage(object):
 
         if type(self.pkg[key]) != type_:
             raise OnlPackageError("key '%s' is the wrong type (%s should be %s)" % (
-                    key, type(pkg[key]), type_))
+                    key, type(self.pkg[key]), type_))
 
         return True
 
@@ -373,6 +373,9 @@ class OnlPackage(object):
                 raise OnlPackageError("Post-install script '%s' does not exist." % self.pkg['post-install'])
             command = command + "--after-install %s" % self.pkg['post-install']
 
+        if logger.level < logging.INFO:
+            command = command + "--verbose "
+
         onlu.execute(command)
 
         # Grab the package from the workdir. There can be only one.
@@ -506,7 +509,8 @@ class OnlPackageGroup(object):
         for bp in buildpaths:
             if os.path.exists(bp):
                 MAKE = os.environ.get('MAKE', "make")
-                cmd = MAKE + ' -C ' + bp + " " + os.environ.get('ONLPM_MAKE_OPTIONS', "") + " " + os.environ.get('ONL_MAKE_PARALLEL', "") + " " + target
+                V = " V=1 " if logger.level < logging.INFO else ""
+                cmd = MAKE + V + ' -C ' + bp + " " + os.environ.get('ONLPM_MAKE_OPTIONS', "") + " " + os.environ.get('ONL_MAKE_PARALLEL', "") + " " + target
                 onlu.execute(cmd,
                              ex=OnlPackageError('%s failed.' % operation))
 
@@ -601,8 +605,8 @@ class OnlPackageRepo(object):
                 package = os.path.split(underscores[0])[1]
                 # Architecture is the last entry (.deb)
                 arch = underscores[-1].split('.')[0]
-                logger.debug("+ /bin/cp %s %s/%s", p, self.repo, arch)
-                dstdir = os.path.join(self.repo, arch)
+                logger.debug("+ /bin/cp %s %s/%s", p, self.repo, "binary-" + arch)
+                dstdir = os.path.join(self.repo, "binary-" + arch)
                 if not os.path.exists(dstdir):
                     os.makedirs(dstdir)
                 logger.info("dstdir=%s"% dstdir)
@@ -633,7 +637,7 @@ class OnlPackageRepo(object):
         with self.lock:
             rv = []
             (name, arch) = OnlPackage.idparse(pkg)
-            dirname = os.path.join(self.repo, arch)
+            dirname = os.path.join(self.repo, "binary-" + arch)
             if os.path.exists(dirname):
                 manifest = os.listdir(dirname)
                 rv = [ os.path.join(dirname, x) for x in manifest if arch in x and "%s_" % name in x ]
@@ -778,7 +782,7 @@ class OnlPackageManager(object):
         pkgspec = [ 'PKG.yml', 'pkg.yml' ]
 
         import cPickle as pickle
-        CACHE=os.path.join(basedir, '.PKGs.cache')
+        CACHE=os.path.join(basedir, '.PKGs.cache.%s' % g_dist_codename)
 
         # Lock the CACHE file
         with onlu.Lock(CACHE + ".lock"):
@@ -1012,7 +1016,7 @@ if __name__ == '__main__':
     ap.add_argument("--csv", action='store_true')
     ap.add_argument("--show-group", action='store_true')
     ap.add_argument("--arch")
-    ap.add_argument("--arches", nargs='+', default=['amd64', 'powerpc', 'all']),
+    ap.add_argument("--arches", nargs='+', default=['amd64', 'powerpc', 'armel', 'all']),
     ap.add_argument("--pmake", action='store_true')
     ap.add_argument("--prereq-packages", action='store_true')
     ap.add_argument("--lookup", metavar='PACKAGE')
@@ -1051,6 +1055,10 @@ if __name__ == '__main__':
         for j in ops.include_env_json.split(':'):
             data = json.load(open(j))
             for (k, v) in data.iteritems():
+                try:
+                    v = v.encode('ascii')
+                except UnicodeEncodeError:
+                    pass
                 os.environ[k] = v
 
     #
@@ -1238,5 +1246,3 @@ if __name__ == '__main__':
     except (OnlPackageError, onlyaml.OnlYamlError), e:
         logger.error(e)
         sys.exit(1)
-
-

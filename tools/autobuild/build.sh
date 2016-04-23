@@ -9,7 +9,7 @@ ONL="$(realpath $(dirname $AUTOBUILD_SCRIPT)/../../)"
 # Default build branch
 BUILD_BRANCH=master
 
-while getopts ":b:s:d:u:p:vc78" opt; do
+while getopts ":b:s:d:u:p:vc78r:" opt; do
     case $opt in
         7)
             ONLB_OPTIONS=--7
@@ -32,6 +32,9 @@ while getopts ":b:s:d:u:p:vc78" opt; do
         v)
             set -x
             ;;
+        r)
+            export BUILDROOTMIRROR=$OPTARG
+            ;;
         *)
             ;;
     esac
@@ -53,7 +56,7 @@ fi
 #
 if [ -z "$DOCKER_IMAGE" ]; then
     # Execute ourselves under the builder
-    ONLB=/usr/local/bin/onlbuilder
+    ONLB=$ONL/docker/tools/onlbuilder
     if [ -x $ONLB ]; then
         $ONLB $ONLB_OPTIONS --volumes $ONL --non-interactive -c $AUTOBUILD_SCRIPT $@
         exit $?

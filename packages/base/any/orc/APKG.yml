@@ -6,8 +6,8 @@
 #
 ############################################################
 variables:
-  libdir: /lib/${TOOLCHAIN}
-  bindir: /bin
+  libdir: /usr/share/orc/drivers
+  bindir: /usr/sbin
 
 common:
   arch: $ARCH

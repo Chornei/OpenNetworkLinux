@@ -12,15 +12,15 @@
 #
 #
     mkdir /newroot
-    msg_info "checking if /mnt/flash2/ONL exists"
+    msg_info "checking if /mnt/onl/ONL-DATA/ONL exists"
 
-    if [ ! -d /mnt/flash2/ONL ]; then 
+    if [ ! -d /mnt/onl/ONL-DATA/ONL ]; then 
     msg_info "extracting rootfs to ONL directory"
-    cd /mnt/flash2
+    cd /mnt/onl/ONL-DATA
     unzip *.swi
     unsquashfs -d ONL rootfs-amd64.sqsh
     msg_info "booting from installed image"
-    mount --bind /mnt/flash2/ONL/ /newroot
+    mount --bind /mnt/onl/ONL-DATA/ONL/ /newroot
     mkdir -p /newroot/etc/onl
     cp -R /etc/onl/* /newroot/etc/onl
     else
@@ -28,7 +28,7 @@
     fi
 
     msg_info "booting from installed image"
-    mount --bind /mnt/flash2/ONL/ /newroot
+    mount --bind /mnt/onl/ONL-DATA/ONL/ /newroot
 
     if [ -f /etc/fw_env.config ]; then
     cat /etc/fw_env.config >/newroot/etc/fw_env.config

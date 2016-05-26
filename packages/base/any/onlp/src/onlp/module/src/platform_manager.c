@@ -134,6 +134,7 @@ onlp_sys_platform_manage_init(void)
         int i;
         uint64_t now = os_time_monotonic();
 
+        onlp_sysi_platform_manage_init();
         control__.tw = timer_wheel_create(4, 512, now);
 
         for(i = 0; i < AIM_ARRAYSIZE(management_entries); i++) {
@@ -228,7 +229,7 @@ onlp_sys_platform_manage_thread__(void* vctrl)
 }
 
 int
-onlp_sys_platform_manage_start(void)
+onlp_sys_platform_manage_start(int block)
 {
     onlp_sys_platform_manage_init();
 
@@ -250,18 +251,36 @@ onlp_sys_platform_manage_start(void)
         return -1;
     }
 
+    if(block) {
+        onlp_sys_platform_manage_join();
+    }
+
     return 0;
 }
 
 int
-onlp_sys_platform_manage_stop(void)
+onlp_sys_platform_manage_stop(int block)
 {
     if(control__.eventfd > 0) {
         uint64_t zero = 1;
         /* Tell the thread to exit */
         write(control__.eventfd, &zero, sizeof(zero));
+
+        if(block) {
+            onlp_sys_platform_manage_join();
+        }
+    }
+    return 0;
+}
+
+int
+onlp_sys_platform_manage_join(void)
+{
+    if(control__.eventfd > 0) {
         /* Wait for the thread to terminate */
         pthread_join(control__.thread, NULL);
+        close(control__.eventfd);
+        control__.eventfd = -1;
     }
     return 0;
 }

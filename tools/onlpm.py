@@ -24,7 +24,7 @@ import lsb_release
 
 g_dist_codename = lsb_release.get_distro_information().get('CODENAME')
 
-logger = onlu.init_logging('onlpm')
+logger = onlu.init_logging('onlpm', logging.INFO)
 
 class OnlPackageError(Exception):
     """General Package Error Exception
@@ -201,7 +201,7 @@ class OnlPackage(object):
 
         if type(self.pkg[key]) != type_:
             raise OnlPackageError("key '%s' is the wrong type (%s should be %s)" % (
-                    key, type(pkg[key]), type_))
+                    key, type(self.pkg[key]), type_))
 
         return True
 
@@ -366,12 +366,15 @@ class OnlPackage(object):
         if 'init' in self.pkg:
             if not os.path.exists(self.pkg['init']):
                 raise OnlPackageError("Init script '%s' does not exist." % self.pkg['init'])
-            command = command + "--deb-init %s" % self.pkg['init']
+            command = command + "--deb-init %s " % self.pkg['init']
 
         if 'post-install' in self.pkg:
             if not os.path.exists(self.pkg['post-install']):
                 raise OnlPackageError("Post-install script '%s' does not exist." % self.pkg['post-install'])
-            command = command + "--after-install %s" % self.pkg['post-install']
+            command = command + "--after-install %s " % self.pkg['post-install']
+
+        if logger.level < logging.INFO:
+            command = command + "--verbose "
 
         onlu.execute(command)
 
@@ -506,7 +509,8 @@ class OnlPackageGroup(object):
         for bp in buildpaths:
             if os.path.exists(bp):
                 MAKE = os.environ.get('MAKE', "make")
-                cmd = MAKE + ' -C ' + bp + " " + os.environ.get('ONLPM_MAKE_OPTIONS', "") + " " + os.environ.get('ONL_MAKE_PARALLEL', "") + " " + target
+                V = " V=1 " if logger.level < logging.INFO else ""
+                cmd = MAKE + V + ' -C ' + bp + " " + os.environ.get('ONLPM_MAKE_OPTIONS', "") + " " + os.environ.get('ONL_MAKE_PARALLEL', "") + " " + target
                 onlu.execute(cmd,
                              ex=OnlPackageError('%s failed.' % operation))
 
@@ -544,8 +548,9 @@ class OnlPackageGroup(object):
                                                       dict(),
                                                       OnlPackageError)
             for f in release_list:
-                # Todo -- customize
-                dst = os.path.join(os.getenv('ONL'), 'RELEASE', g_dist_codename, f[1])
+                release_dir = os.environ.get('ONLPM_OPTION_RELEASE_DIR',
+                                             os.path.join(os.environ.get('ONL', 'RELEASE')))
+                dst = os.path.join(release_dir, g_dist_codename, f[1])
                 if not os.path.exists(dst):
                     os.makedirs(dst)
                 logger.info("Releasing %s -> %s" % (os.path.basename(f[0]), dst))
@@ -556,7 +561,6 @@ class OnlPackageGroup(object):
     def clean(self, dir_=None):
         with onlu.Lock(os.path.join(self._pkgs['__directory'], '.lock')):
             self.gmake_locked("clean", 'Clean')
-
 
 class OnlPackageRepo(object):
     """Package Repository and Interchange Class
@@ -601,8 +605,8 @@ class OnlPackageRepo(object):
                 package = os.path.split(underscores[0])[1]
                 # Architecture is the last entry (.deb)
                 arch = underscores[-1].split('.')[0]
-                logger.debug("+ /bin/cp %s %s/%s", p, self.repo, arch)
-                dstdir = os.path.join(self.repo, arch)
+                logger.debug("+ /bin/cp %s %s/%s", p, self.repo, "binary-" + arch)
+                dstdir = os.path.join(self.repo, "binary-" + arch)
                 if not os.path.exists(dstdir):
                     os.makedirs(dstdir)
                 logger.info("dstdir=%s"% dstdir)
@@ -633,7 +637,7 @@ class OnlPackageRepo(object):
         with self.lock:
             rv = []
             (name, arch) = OnlPackage.idparse(pkg)
-            dirname = os.path.join(self.repo, arch)
+            dirname = os.path.join(self.repo, "binary-" + arch)
             if os.path.exists(dirname):
                 manifest = os.listdir(dirname)
                 rv = [ os.path.join(dirname, x) for x in manifest if arch in x and "%s_" % name in x ]
@@ -761,8 +765,8 @@ class OnlPackageManager(object):
         self.package_groups = []
         self.opr = None
 
-    def set_repo(self, repodir):
-        self.opr = OnlPackageRepo(repodir, ops.repo_package_dir)
+    def set_repo(self, repodir, packagedir='packages'):
+        self.opr = OnlPackageRepo(repodir, packagedir=packagedir)
 
 
     def filter(self, subdir=None, arches=None, substr=None):
@@ -778,7 +782,7 @@ class OnlPackageManager(object):
         pkgspec = [ 'PKG.yml', 'pkg.yml' ]
 
         import cPickle as pickle
-        CACHE=os.path.join(basedir, '.PKGs.cache')
+        CACHE=os.path.join(basedir, '.PKGs.cache.%s' % g_dist_codename)
 
         # Lock the CACHE file
         with onlu.Lock(CACHE + ".lock"):
@@ -995,6 +999,43 @@ class OnlPackageManager(object):
     def pkg_info(self):
         return "\n".join([ pg.pkg_info() for pg in self.package_groups if not pg.filtered ])
 
+    def list_platforms(self, arch):
+        platforms = []
+        for pg in self.package_groups:
+            for p in pg.packages:
+                (name, pkgArch) = OnlPackage.idparse(p.id())
+                m = re.match(r'onl-platform-config-(?P<platform>.*)', name)
+                if m:
+                    if arch in [ pkgArch, "all", None ]:
+                        platforms.append(m.groups('platform')[0])
+        return platforms
+
+def defaultPm():
+    repo = os.environ.get('ONLPM_OPTION_REPO', None)
+    envJson = os.environ.get('ONLPM_OPTION_INCLUDE_ENV_JSON', None)
+    packagedirs = os.environ['ONLPM_OPTION_PACKAGEDIRS'].split(':')
+    repoPackageDir = os.environ.get('ONLPM_OPTION_REPO_PACKAGE_DIR', 'packages')
+    subdir = os.getcwd()
+    arches = ['amd64', 'powerpc', 'armel', 'all',]
+
+    if envJson:
+        for j in envJson.split(':'):
+            data = json.load(open(j))
+            for (k, v) in data.iteritems():
+                try:
+                    v = v.encode('ascii')
+                except UnicodeEncodeError:
+                    pass
+                os.environ[k] = v
+
+    pm = OnlPackageManager()
+    pm.set_repo(repo, packagedir=repoPackageDir)
+    for pdir in packagedirs:
+        pm.load(pdir, usecache=True, rebuildcache=False)
+    pm.filter(subdir = subdir, arches=arches)
+
+    return pm
+
 if __name__ == '__main__':
 
     ap = argparse.ArgumentParser("onlpm")
@@ -1012,7 +1053,7 @@ if __name__ == '__main__':
     ap.add_argument("--csv", action='store_true')
     ap.add_argument("--show-group", action='store_true')
     ap.add_argument("--arch")
-    ap.add_argument("--arches", nargs='+', default=['amd64', 'powerpc', 'all']),
+    ap.add_argument("--arches", nargs='+', default=['amd64', 'powerpc', 'armel', 'all']),
     ap.add_argument("--pmake", action='store_true')
     ap.add_argument("--prereq-packages", action='store_true')
     ap.add_argument("--lookup", metavar='PACKAGE')
@@ -1051,6 +1092,10 @@ if __name__ == '__main__':
         for j in ops.include_env_json.split(':'):
             data = json.load(open(j))
             for (k, v) in data.iteritems():
+                try:
+                    v = v.encode('ascii')
+                except UnicodeEncodeError:
+                    pass
                 os.environ[k] = v
 
     #
@@ -1082,7 +1127,7 @@ if __name__ == '__main__':
         pm = OnlPackageManager()
         if ops.repo:
             logger.debug("Setting repo as '%s'..." % ops.repo)
-            pm.set_repo(ops.repo)
+            pm.set_repo(ops.repo, packagedir=ops.repo_package_dir)
 
         if ops.in_repo:
             for p in ops.in_repo:
@@ -1105,15 +1150,10 @@ if __name__ == '__main__':
                             print
 
         if ops.list_platforms:
-            platforms = []
-            for pg in pm.package_groups:
-                for p in pg.packages:
-                    (name, arch) = OnlPackage.idparse(p.id())
-                    m = re.match(r'onl-platform-config-(?P<platform>.*)', name)
-                    if m:
-                        if ops.arch in [ arch, "all", None ]:
-                            platforms.append(m.groups('platform')[0])
-
+            if not ops.arch:
+                logger.error("missing --arch with --list-platforms")
+                sys.exit(1)
+            platforms = pm.list_platforms(ops.arch)
             if ops.csv:
                 print ','.join(platforms)
             else:
@@ -1238,5 +1278,3 @@ if __name__ == '__main__':
     except (OnlPackageError, onlyaml.OnlYamlError), e:
         logger.error(e)
         sys.exit(1)
-
-

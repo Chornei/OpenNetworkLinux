@@ -131,6 +131,11 @@ int onlp_sysi_ioctl(int code, va_list vargs);
 
 
 /**
+ * @brief Platform management initialization.
+ */
+int onlp_sysi_platform_manage_init(void);
+
+/**
  * @brief Perform necessary platform fan management.
  * @note This function should automatically adjust the FAN speeds
  * according to the platform conditions.
@@ -153,5 +158,10 @@ int onlp_sysi_platform_info_get(onlp_platform_info_t* info);
  * @brief Friee a custom platform information structure.
  */
 void onlp_sysi_platform_info_free(onlp_platform_info_t* info);
+
+/**
+ * @brief Builtin platform debug tool.
+ */
+int onlp_sysi_debug(aim_pvs_t* pvs, int argc, char** argv);
 
 #endif /* __ONLP_SYSI_H__ */

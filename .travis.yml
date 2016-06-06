@@ -1,0 +1,11 @@
+sudo: required
+
+language: c
+
+services:
+  - docker
+
+script:
+- docker/tools/onlbuilder
+- source setup.env
+- make onl-x86

@@ -145,7 +145,7 @@ do_handle_partitions()
 
 
   case "$label" in
-      ONIE-BOOT|GRUB-BOOT|*-DIAG)
+      ONIE-BOOT|GRUB-BOOT|EFI*|*-DIAG)
           installer_say "Partition $DEV$part: $label: Preserving..."
           ;;
       *)

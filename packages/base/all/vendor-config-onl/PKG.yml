@@ -11,9 +11,9 @@ packages:
       src/python/onl : $PY_INSTALL/onl
       src/boot.d : /etc/boot.d
       src/bin/initubootenv: /sbin/initubootenv
-      src/bin/initmounts: /sbin/initmounts
+      src/bin/onl-mounts: /sbin/onl-mounts
       src/bin/initnetdev: /sbin/initnetdev
-      src/bin/pki : /sbin/pki
+      src/bin/onl-pki : /sbin/onl-pki
       src/bin/loader-shell: /usr/bin/loader-shell
       src/bin/onie-shell: /usr/bin/onie-shell
       src/bin/onl-platform-show: /usr/bin/onl-platform-show

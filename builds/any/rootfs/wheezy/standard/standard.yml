@@ -90,6 +90,8 @@ Configure:
   users:
     root:
       password: onl
+    admin:
+      password: onl
 
   manifest:
     version: $ONL/make/version-onl.json

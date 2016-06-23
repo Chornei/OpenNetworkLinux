@@ -36,6 +36,11 @@ class MountManager(object):
                 return True
         return False
 
+    def checkroot(self, dev):
+            pat = "%s / " % dev
+            with open("/proc/mounts") as f:
+                return pat in f.read()
+
     def mount(self, device, directory, mode='r', timeout=5):
 
         mountargs = [ str(mode) ]
@@ -57,6 +62,7 @@ class MountManager(object):
             cmd = "mount -o %s %s %s" % (','.join(mountargs), device, directory)
             self.logger.debug("+ %s" % cmd)
             subprocess.check_call(cmd, shell=True)
+
         except subprocess.CalledProcessError, e:
             self.logger.error("Mount failed: '%s'" % e.output)
             return False
@@ -148,14 +154,54 @@ class OnlMountManager(object):
                     self.missing = k
                     return False
 
+            isRoot = self.checkroot(v['device'])
+            # if this device is current the root device,
+            # ignore any umount/mount/fsck shenanigans
+
             #
             # Make the mount point for future use.
+            # If its currently mounted we should unmount first.
+            #
+            if not isRoot and self.checkmount(v['device']):
+                self.logger.info("%s is currently mounted." % (k))
+                try:
+                    out = subprocess.check_output("umount %s" % v['device'], shell=True)
+                    self.logger.info("%s now unmounted." % (k))
+                except subprocess.CalledProcessError,e:
+                    self.logger.error("Could not unmount %s @ %s: %s" % (k, v['device'], e.output))
+                    continue
+            #
+            # FS Checks
             #
             if not os.path.isdir(v['dir']):
                 self.logger.debug("Make directory '%s'..." % v['dir'])
                 os.makedirs(v['dir'])
 
             self.logger.debug("%s @ %s" % (k, v['device']))
+            if not isRoot and v.get('fsck', False):
+                try:
+                    self.logger.info("Running fsck on %s [ %s ]..." % (k, v['device']))
+                    cmd = "fsck.ext4 -p %s" % (v['device'])
+                    self.logger.debug(cmd)
+                    try:
+                        out = subprocess.check_output(cmd, shell=True)
+                        self.logger.info("%s [ %s ] is clean." % (v['device'], k))
+                    except subprocess.CalledProcessError, e:
+                        self.logger.error("fsck failed: %s" % e.output)
+                except subprocess.CalledProcessError, e:
+                    # Todo - recovery options
+                    raise
+
+
+            if all_:
+                v['mount'] = 'w'
+
+            mount = v.get('mount', None)
+            if not isRoot and mount:
+                if mount in ['r', 'w']:
+                    self.mount(v['device'], v['dir'], mode=mount, timeout=v.get('timeout', 5))
+                else:
+                    self.logger("Mount %s has an invalid mount mode (%s)" % (k, mount))
 
     def __fsck(self, label, device):
         self.logger.info("Running fsck on %s [ %s ]..." % (label, device))

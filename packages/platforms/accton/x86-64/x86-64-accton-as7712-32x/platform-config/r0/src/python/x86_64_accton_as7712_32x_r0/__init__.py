@@ -1,16 +1,11 @@
 from onl.platform.base import *
 from onl.platform.accton import *
 
-class OnlPlatform_x86_64_accton_as7712_32x_r0(OnlPlatformAccton):
-
-    def model(self):
-        return "AS7712-32X"
-
-    def platform(self):
-        return "x86-64-accton-as7712-32x-r0"
-
-    def sys_oid_platform(self):
-        return ".7712.32"
+class OnlPlatform_x86_64_accton_as7712_32x_r0(OnlPlatformAccton,
+                                              OnlPlatformPortConfig_32x100):
+    PLATFORM='x86-64-accton-as7712-32x-r0'
+    MODEL="AS7712-32X"
+    SYS_OBJECT_ID=".7712.32"
 
     def baseconfig(self):
         ########### initialize I2C bus 0 ###########
@@ -26,6 +21,7 @@ class OnlPlatform_x86_64_accton_as7712_32x_r0(OnlPlatformAccton):
             ('lm75', 0x48, 3),
             ('lm75', 0x49, 3),
             ('lm75', 0x4a, 3),
+            ('lm75', 0x4b, 3),
 
             ('accton_i2c_cpld', 0x60, 4),
             ('accton_i2c_cpld', 0x62, 5),

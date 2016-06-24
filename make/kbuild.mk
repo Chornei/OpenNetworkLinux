@@ -144,12 +144,17 @@ build: setup
 	+$(K_MAKE) $(K_BUILD_TARGET)
 ifdef K_COPY_SRC
 ifdef K_COPY_DST
+ifdef K_COPY_GZIP
+	gzip -c $(K_SOURCE_DIR)/$(K_COPY_SRC) > $(K_TARGET_DIR)/$(K_COPY_DST)
+else
 	cp $(K_SOURCE_DIR)/$(K_COPY_SRC) $(K_TARGET_DIR)/$(K_COPY_DST)
 endif
 endif
+endif
 
 
-MODSYNCLIST := .config Module.symvers Makefile include scripts arch/x86/include arch/x86/Makefile arch/powerpc/include arch/powerpc/Makefile arch/powerpc/lib
+MODSYNCLIST_DEFAULT := .config Module.symvers Makefile include scripts arch/x86/include arch/x86/Makefile arch/powerpc/include arch/powerpc/Makefile arch/powerpc/lib arch/arm/include arch/arm/Makefile arch/arm/lib
+MODSYNCLIST := $(MODSYNCLIST_DEFAULT) $(MODSYNCLIST_EXTRA)
 
 mbuild: build
 	rm -rf $(K_MBUILD_DIR)

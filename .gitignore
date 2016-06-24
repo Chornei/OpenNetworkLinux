@@ -7,11 +7,11 @@ dependmodules.x
 *.cpio.gz
 *.sqsh
 *.pyc
+*.pyo
 
 # Package cache and lock files
 .lock
-.PKGs.cache
-.PKGs.cache.lock
+.PKGs.cache*
 
 # Local module manifest.
 .manifest.mk
@@ -19,3 +19,7 @@ RELEASE/
 
 .bash_history
 .buildroot-ccache
+
+# temporary files
+*~
+.#*

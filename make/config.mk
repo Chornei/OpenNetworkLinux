@@ -7,7 +7,7 @@ ifndef ONL
   $(error $$ONL is not defined)
 endif
 
-ifndef ONLPM_PY
+ifndef ONLPM
   ONLPM := $(ONL)/tools/onlpm.py
 endif
 
@@ -22,19 +22,49 @@ endif
 ifndef ONL_DEBIAN_SUITE
 $(error "The $$ONL_DEBIAN_SUITE value is not set. Please source $$ONL/setup.env")
 endif
+export ONL_DEBIAN_SUITE_$(ONL_DEBIAN_SUITE)=1
 
 export BUILD_DIR_BASE=BUILD/$(ONL_DEBIAN_SUITE)
 
-
 # Generate manifest if necessary
-export MODULEMANIFEST := $(shell $(BUILDER)/tools/mmg.py --dirs $(ONL) $(ONLPM_OPTION_PACKAGEDIRS) --out $(ONL)/make/module-manifest.mk --only-if-missing make)
+export MODULEMANIFEST := $(shell $(BUILDER)/tools/mmg.py $(ONL)/make/mmg.yml $(ONL) --only-if-missing)
+
+# Generate versions if necessary.
+$(shell $(ONL)/tools/make-versions.py --import-file=$(ONL)/tools/onlvi --class-name=OnlVersionImplementation --output-dir $(ONL)/make/versions)
+
 
 #
 # Default make options.
 #
-ONL_MAKE_FLAGS += --no-print-directory -s
-ONL_MAKE := $(MAKE) $(ONL_MAKE_FLAGS)
+ifeq ("$(origin V)", "command line")
+VERBOSE := $(V)
+endif
+
+ifneq ($(VERBOSE),1)
+
+# quiet settings
+ONL_V_P := false
 ONL_V_at := @
+ONL_V_GEN = @set -e; echo GEN $@;
+
+else
+
+# verbose settings
+ONL_V_P := :
+
+endif
+
+ifneq ($(VERBOSE),1)
+
+ONL_MAKE_FLAGS += --no-print-directory -s
+
+else
+
+ONL_MAKE_FLAGS += V=1
+
+endif
+
+ONL_MAKE := $(MAKE) $(ONL_MAKE_FLAGS)
 
 #
 # Some build and autogen tools require these settings.

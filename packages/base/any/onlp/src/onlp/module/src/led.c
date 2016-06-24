@@ -117,6 +117,25 @@ onlp_led_mode_set_locked__(onlp_oid_t id, onlp_led_mode_t mode)
 }
 ONLP_LOCKED_API2(onlp_led_mode_set, onlp_oid_t, id, onlp_led_mode_t, mode);
 
+static int
+onlp_led_char_set_locked__(onlp_oid_t id, char c)
+{
+    onlp_led_info_t info;
+    ONLP_LED_PRESENT_OR_RETURN(id, &info);
+
+    /*
+     * The mode enumeration values always match
+     * the capability bit positions.
+     */
+    if(info.caps & ONLP_LED_CAPS_CHAR) {
+        return onlp_ledi_char_set(id, c);
+    }
+    else {
+        return ONLP_STATUS_E_UNSUPPORTED;
+    }
+}
+ONLP_LOCKED_API2(onlp_led_char_set, onlp_oid_t, id, char, c);
+
 /************************************************************
  *
  * Debug and Show Functions
@@ -144,6 +163,7 @@ onlp_led_dump(onlp_oid_t id, aim_pvs_t* pvs, uint32_t flags)
             iof_iprintf(&iof, "Status: %{onlp_led_status_flags}", info.status);
             iof_iprintf(&iof, "Caps:   %{onlp_led_caps_flags}", info.caps);
             iof_iprintf(&iof, "Mode: %{onlp_led_mode}", info.mode);
+            iof_iprintf(&iof, "Char: %c", info.character);
         }
         else {
             iof_iprintf(&iof, "Not present.");
@@ -158,19 +178,40 @@ onlp_led_show(onlp_oid_t id, aim_pvs_t* pvs, uint32_t flags)
     int rv;
     iof_t iof;
     onlp_led_info_t info;
+    int yaml;
 
     VALIDATENR(id);
     onlp_oid_show_iof_init_default(&iof, pvs, flags);
-    iof_push(&iof, "LED %d", ONLP_OID_ID_GET(id));
+
+    yaml = flags & ONLP_OID_SHOW_F_YAML;
+
+    if(yaml) {
+        iof_push(&iof, " -");
+        iof_iprintf(&iof, "Name: LED %d", ONLP_OID_ID_GET(id));
+    }
+    else {
+        iof_push(&iof, "LED %d", ONLP_OID_ID_GET(id));
+    }
+
     rv = onlp_led_info_get(id, &info);
     if(rv < 0) {
-        onlp_oid_info_get_error(&iof, rv);
+        if(yaml) {
+            iof_iprintf(&iof, "State: Error");
+            iof_iprintf(&iof, "Error: %{onlp_status}", rv);
+        }
+        else {
+            onlp_oid_info_get_error(&iof, rv);
+        }
     }
     else {
         onlp_oid_show_description(&iof, &info.hdr);
         if(info.status & 1) {
             /* Present */
+            iof_iprintf(&iof, "State: Present");
             iof_iprintf(&iof, "Mode: %{onlp_led_mode}", info.mode);
+            if(info.caps & ONLP_LED_CAPS_CHAR) {
+                iof_iprintf(&iof, "Char: %c", info.character);
+            }
         }
         else {
             onlp_oid_show_state_missing(&iof);

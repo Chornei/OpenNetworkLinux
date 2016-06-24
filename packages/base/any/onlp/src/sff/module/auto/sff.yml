@@ -32,6 +32,9 @@ cdefs: &cdefs
 - SFF_CONFIG_INCLUDE_EXT_CC_CHECK:
     doc: "Include extended checksum verification."
     default: 0
+- SFF_CONFIG_INCLUDE_DATABASE:
+    doc: "Include eeprom database."
+    default: 1
 
 sff_media_types: &sff_media_types
 - COPPER:
@@ -48,12 +51,16 @@ sff_module_types: &sff_module_types
     desc: "100GBASE-SR4"
 - 100G_BASE_LR4:
     desc: "100GBASE-LR4"
+- 100G_CWDM4:
+    desc: "100G-CWDM4"
 - 40G_BASE_CR4:
     desc: "40GBASE-CR4"
 - 40G_BASE_SR4:
     desc: "40GBASE-SR4"
 - 40G_BASE_LR4:
     desc: "40GBASE-LR4"
+- 40G_BASE_LM4:
+    desc: "40GBASE-LM4"
 - 40G_BASE_ACTIVE:
     desc: "40GBASE-ACTIVE"
 - 40G_BASE_CR:

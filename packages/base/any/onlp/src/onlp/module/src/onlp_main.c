@@ -28,17 +28,18 @@
 #include <onlp/sys.h>
 #include <onlp/sfp.h>
 #include <sff/sff.h>
+#include <sff/sff_db.h>
 #include <AIM/aim_log_handler.h>
 #include <syslog.h>
 
-static void platform_manager_daemon__(const char* pidfile);
+static void platform_manager_daemon__(const char* pidfile, char** argv);
 
 /**
  * Human-readable SFP inventory.
  * This should be moved to common.
  */
 static void
-show_inventory__(aim_pvs_t* pvs)
+show_inventory__(aim_pvs_t* pvs, int database)
 {
     int port;
     onlp_sfp_bitmap_t bitmap;
@@ -50,8 +51,10 @@ show_inventory__(aim_pvs_t* pvs)
         aim_printf(pvs, "No SFPs on this platform.\n");
     }
     else {
+        if(!database) {
         aim_printf(pvs, "Port  Type            Media   Status  Len    Vendor            Model             S/N             \n");
         aim_printf(pvs, "----  --------------  ------  ------  -----  ----------------  ----------------  ----------------\n");
+        }
 
         AIM_BITMAP_ITER(&bitmap, port) {
             int rv;
@@ -60,7 +63,9 @@ show_inventory__(aim_pvs_t* pvs)
             rv = onlp_sfp_is_present(port);
 
             if(rv == 0) {
+                if(!database) {
                 aim_printf(pvs, "%4d  NONE\n", port);
+                }
                 continue;
             }
 
@@ -76,17 +81,21 @@ show_inventory__(aim_pvs_t* pvs)
                 continue;
             }
 
-            sff_info_t sff;
+            sff_eeprom_t sff;
             char status_str[32] = {0};
 
-            sff_info_init(&sff, data);
+            sff_eeprom_parse(&sff, data);
 
-            if(!sff.supported) {
+            if(!sff.identified) {
                 /* Present but unidentified. */
                 aim_printf(pvs, "%13d  UNK\n", port);
                 continue;
             }
 
+            if(database) {
+                sff_db_entry_struct(&sff, &aim_pvs_stdout);
+                continue;
+            }
 
             uint32_t status = 0;
             char* cp = status_str;
@@ -105,13 +114,13 @@ show_inventory__(aim_pvs_t* pvs)
             }
             aim_printf(pvs, "%4d  %-14s  %-6s  %-6.6s  %-5.5s  %-16.16s  %-16.16s  %16.16s\n",
                        port,
-                       sff.module_type_name,
-                       sff.media_type_name,
+                       sff.info.module_type_name,
+                       sff.info.media_type_name,
                        status_str,
-                       sff.length_desc,
-                       sff.vendor,
-                       sff.model,
-                       sff.serial);
+                       sff.info.length_desc,
+                       sff.info.vendor,
+                       sff.info.model,
+                       sff.info.serial);
         }
     }
 }
@@ -170,11 +179,20 @@ onlpdump_main(int argc, char* argv[])
     int S = 0;
     int l = 0;
     int M = 0;
+    int b = 0;
     char* pidfile = NULL;
     const char* O = NULL;
     const char* t = NULL;
 
-    while( (c = getopt(argc, argv, "srehdojmM:ipxlSt:O:")) != -1) {
+    /**
+     * debug trap
+     */
+    if(argc > 1 && !strcmp(argv[1], "debug")) {
+        onlp_init();
+        return onlp_sys_debug(&aim_pvs_stdout, argc-2, argv+2);
+    }
+
+    while( (c = getopt(argc, argv, "srehdojmyM:ipxlSt:O:b")) != -1) {
         switch(c)
             {
             case 's': show=1; break;
@@ -193,13 +211,10 @@ onlpdump_main(int argc, char* argv[])
             case 'O': O = optarg; break;
             case 'S': S=1; break;
             case 'l': l=1; break;
+            case 'b': b=1; break;
+            case 'y': show=1; showflags |= ONLP_OID_SHOW_F_YAML; break;
             default: help=1; rv = 1; break;
             }
-    }
-
-    if(M) {
-        platform_manager_daemon__(pidfile);
-        exit(0);
     }
 
     if(help) {
@@ -208,6 +223,7 @@ onlpdump_main(int argc, char* argv[])
         printf("  -s   Use show() instead of dump().\n");
         printf("  -r   Recursive show(). Implies -s\n");
         printf("  -e   Extended show(). Implies -s\n");
+        printf("  -y   Yaml show(). Implies -s\n");
         printf("  -o   Dump ONIE data only.\n");
         printf("  -x   Dump Platform Info only.\n");
         printf("  -j   Dump ONIE data in JSON format.\n");
@@ -218,12 +234,13 @@ onlpdump_main(int argc, char* argv[])
         printf("  -t   <file>  Decode TlvInfo data.\n");
         printf("  -O   <oid> Dump OID.\n");
         printf("  -S   Decode SFP Inventory\n");
+        printf("  -b   Decode SFP Inventory into SFF database entries.\n");
         printf("  -l   API Lock test.\n");
         return rv;
     }
 
 
-    if(t){
+    if(t) {
         int rv;
         onlp_onie_info_t onie;
         rv = onlp_onie_decode_file(&onie, t);
@@ -240,6 +257,11 @@ onlpdump_main(int argc, char* argv[])
 
     onlp_init();
 
+    if(M) {
+        platform_manager_daemon__(pidfile, argv);
+        exit(0);
+    }
+
     if(l) {
         extern int onlp_api_lock_test(void);
         int i;
@@ -252,7 +274,7 @@ onlpdump_main(int argc, char* argv[])
     }
 
     if(S) {
-        show_inventory__(&aim_pvs_stdout);
+        show_inventory__(&aim_pvs_stdout, b);
         return 0;
     }
 
@@ -351,14 +373,14 @@ sighandler__(int signal)
 }
 
 static void
-platform_manager_daemon__(const char* pidfile)
+platform_manager_daemon__(const char* pidfile, char** argv)
 {
     aim_pvs_t* aim_pvs_syslog = NULL;
     aim_daemon_restart_config_t rconfig;
     aim_daemon_config_t config;
 
     memset(&config, 0, sizeof(config));
-    aim_daemon_restart_config_init(&rconfig, 1, 1);
+    aim_daemon_restart_config_init(&rconfig, 1, 1, argv);
     AIM_BITMAP_CLR(&rconfig.signal_restarts, SIGTERM);
     AIM_BITMAP_CLR(&rconfig.exit_restarts, 0);
     rconfig.maximum_restarts=50;
@@ -402,9 +424,9 @@ platform_manager_daemon__(const char* pidfile)
 
 #else
 static void
-platform_manager_daemon__(const char* pidfile)
+platform_manager_daemon__(const char* pidfile, char** argv)
 {
-    fprintf(stderr, "Daemon mode not supported in this build.");
+    fprintf(stderr, "Daemon mode not supported in this build.\n");
     exit(1);
 }
 #endif

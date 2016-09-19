@@ -22,6 +22,15 @@
  * Power Supply Management.
  *
  ***********************************************************/
+/**************************************************************************//**
+ *
+ * @file
+ * @brief ONLP Power Supply Management.
+ *
+ * @addtogroup onlp-chassis
+ * @{
+ *
+ *****************************************************************************/
 #ifndef __ONLP_PSU_H__
 #define __ONLP_PSU_H__
 
@@ -52,7 +61,7 @@ typedef enum onlp_psu_status_e {
 
 
 /**
- * PSU Information Structure
+ * PSU information structure
  */
 typedef struct onlp_psu_info_t {
     /** OID Header */

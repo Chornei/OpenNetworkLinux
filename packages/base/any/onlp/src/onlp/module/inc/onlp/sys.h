@@ -22,7 +22,15 @@
  * Platform System Information
  *
  ***********************************************************/
-
+/**************************************************************************//**
+ *
+ * @file sys.h
+ * @brief ONLP Platform System Information.
+ *
+ * @addtogroup onlp-chassis
+ * @{
+ *
+ *****************************************************************************/
 #ifndef __ONLP_SYS_H__
 #define __ONLP_SYS_H__
 
@@ -32,7 +40,9 @@
 #include <onlplib/pi.h>
 #include <onlp/oids.h>
 
-
+/**
+ * System information structure
+ */
 typedef struct onlp_sys_info_s {
     /** OID Header */
     onlp_oid_hdr_t hdr;

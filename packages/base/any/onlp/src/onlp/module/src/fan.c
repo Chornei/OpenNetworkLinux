@@ -22,6 +22,15 @@
  * Fan Management.
  *
  ***********************************************************/
+/**************************************************************************//**
+ *
+ * @file fan.c
+ * @brief ONLP Fan Management.
+ *
+ * @addtogroup onlp-thermal
+ * @{
+ *
+ *****************************************************************************/
 #include <onlp/fan.h>
 #include <onlp/platformi/fani.h>
 #include <onlp/oids.h>

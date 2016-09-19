@@ -22,6 +22,15 @@
  * Fan Platform Implementation.
  *
  ***********************************************************/
+/**************************************************************************//**
+ *
+ * @file fani.h
+ * @brief ONLP Fan platform implementation.
+ *
+ * @addtogroup onlp-thermal
+ * @{
+ *
+ *****************************************************************************/
 #ifndef __ONLP_FANI_H__
 #define __ONLP_FANI_H__
 

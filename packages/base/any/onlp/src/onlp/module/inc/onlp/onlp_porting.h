@@ -25,11 +25,11 @@
 
 /**************************************************************************//**
  *
- * @file
- * @brief onlp Porting Macros.
+ * @file onlp_porting.h
+ * @brief ONLP Porting Macros.
  *
  * @addtogroup onlp-porting
- * @{
+ * 
  *
  *****************************************************************************/
 #ifndef __ONLP_PORTING_H__

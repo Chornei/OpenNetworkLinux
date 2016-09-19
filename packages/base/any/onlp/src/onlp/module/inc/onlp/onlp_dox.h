@@ -22,21 +22,66 @@
  *
  *
  ***********************************************************/
+/**************************************************************************//**
+ *
+ * @file onlp_dox.h
+ * @brief ONLP Documentation.
+ *
+Welcome to the ONLP documentation page
+
+ * @addtogroup onlp-onlp
+ * @{
+ *
+ *****************************************************************************/
 #ifndef __ONLP_DOX_H__
 #define __ONLP_DOX_H__
 
 /**
- * @defgroup onlp onlp - onlp Description
+ * @defgroup onlp-onlp ONLP API Interfaces
  *
 
-The documentation overview for this module should go here.
+ONLP provides an abstraction layer to inventory, manage and monitor system devices.
 
  *
- * @{
+ * @}
  *
- * @defgroup onlp-onlp Public Interface
  * @defgroup onlp-config Compile Time Configuration
+ *
+
+Configuration of system during compile
+
+ *
+ * @}
+ *
  * @defgroup onlp-porting Porting Macros
+ *
+
+ONLP porting macros
+
+ *
+ * @}
+ *
+ * @defgroup onlp-thermal Thermal Configuration
+ *
+
+System thermals configuration including Fans and Temperature Sensors
+
+ *
+ * @}
+ *
+ * @defgroup onlp-chassis Chassis Control
+ *
+
+Chassis control including PSU and LEDs
+
+ *
+ * @}
+ *
+ * @defgroup onlp-optics Interfaces
+ *
+
+Pluggable/Static Optics
+
  *
  * @}
  *

@@ -22,6 +22,15 @@
  * ONLP Platform Object Identifiers.
  *
  ***********************************************************/
+/**************************************************************************//**
+ *
+ * @file oids.h
+ * @brief ONLP Platform Object Identifiers.
+ *
+ * @addtogroup onlp-onlp
+ * @{
+ *
+ *****************************************************************************/
 #ifndef __ONLP_OID_H__
 #define __ONLP_OID_H__
 

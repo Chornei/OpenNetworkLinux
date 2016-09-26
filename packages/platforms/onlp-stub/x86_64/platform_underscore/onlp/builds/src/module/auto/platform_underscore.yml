@@ -1,0 +1,50 @@
+###############################################################################
+#
+# platform_underscore Autogeneration Definitions.
+#
+###############################################################################
+
+cdefs: &cdefs
+- platform_underscore_CONFIG_INCLUDE_LOGGING:
+    doc: "Include or exclude logging."
+    default: 1
+- platform_underscore_CONFIG_LOG_OPTIONS_DEFAULT:
+    doc: "Default enabled log options."
+    default: AIM_LOG_OPTIONS_DEFAULT
+- platform_underscore_CONFIG_LOG_BITS_DEFAULT:
+    doc: "Default enabled log bits."
+    default: AIM_LOG_BITS_DEFAULT
+- platform_underscore_CONFIG_LOG_CUSTOM_BITS_DEFAULT:
+    doc: "Default enabled custom log bits."
+    default: 0
+- platform_underscore_CONFIG_PORTING_STDLIB:
+    doc: "Default all porting macros to use the C standard libraries."
+    default: 1
+- platform_underscore_CONFIG_PORTING_INCLUDE_STDLIB_HEADERS:
+    doc: "Include standard library headers for stdlib porting macros."
+    default: platform_underscore_CONFIG_PORTING_STDLIB
+- platform_underscore_CONFIG_INCLUDE_UCLI:
+    doc: "Include generic uCli support."
+    default: 0
+- platform_underscore_CONFIG_INCLUDE_DEFAULT_FAN_DIRECTION:
+    doc: "Assume chassis fan direction is the same as the PSU fan direction."
+    default: 0
+
+
+definitions:
+  cdefs:
+    platform_underscore_CONFIG_HEADER:
+      defs: *cdefs
+      basename: platform_underscore_config
+
+  portingmacro:
+    platform_underscore:
+      macros:
+        - malloc
+        - free
+        - memset
+        - memcpy
+        - strncpy
+        - vsnprintf
+        - snprintf
+        - strlen

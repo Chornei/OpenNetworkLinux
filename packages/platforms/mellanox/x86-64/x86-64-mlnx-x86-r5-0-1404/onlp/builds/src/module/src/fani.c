@@ -24,6 +24,7 @@
  ***********************************************************/
 #include <onlp/platformi/fani.h>
 #include <onlplib/mmap.h>
+#include <onlplib/file.h>
 #include <fcntl.h>
 #include "platform_lib.h"
 
@@ -138,29 +139,18 @@ onlp_fan_info_t linfo[] = {
 static int
 _onlp_fani_info_get_fan(int local_id, onlp_fan_info_t* info)
 {
-    int   fd, len, nbytes = 10;
-    char  r_data[10]   = {0};
-    char  fullpath[65] = {0};
+   int status, speed;
 
-    /* get fan fault status (turn on when any one fails)
+   onlp_file_read_int(&status, "%s%s", PREFIX_PATH_ON_MAIN_BOARD, fan_path[local_id].status);
+   if (status > 0) 
+       info->status |= ONLP_FAN_STATUS_FAILED;
+
+  /* get fan speed (take the min from two speeds)
      */
-    sprintf(fullpath, "%s%s", PREFIX_PATH_ON_MAIN_BOARD, fan_path[local_id].status);
-    OPEN_READ_FILE(fd,fullpath,r_data,nbytes,len);
-    if (atoi(r_data) > 0) {
-        info->status |= ONLP_FAN_STATUS_FAILED;
-    }
-
-    /* get fan speed (take the min from two speeds)
-     */
-    sprintf(fullpath, "%s%s", PREFIX_PATH_ON_MAIN_BOARD, fan_path[local_id].speed);
-    OPEN_READ_FILE(fd,fullpath,r_data,nbytes,len);
-    info->rpm = atoi(r_data);
-
-    sprintf(fullpath, "%s%s", PREFIX_PATH_ON_MAIN_BOARD, fan_path[local_id].r_speed);
-    OPEN_READ_FILE(fd,fullpath,r_data,nbytes,len);
-    if (info->rpm > atoi(r_data)) {
-        info->rpm = atoi(r_data);
-    }
+   onlp_file_read_int(&info->rpm, "%s%s", PREFIX_PATH_ON_PSU, fan_path[local_id].speed);
+   onlp_file_read_int(&speed, "%s%s", PREFIX_PATH_ON_PSU, fan_path[local_id].r_speed);
+   if ( info->rpm > speed )
+        info->rpm = speed;
 
     /* get speed percentage from rpm */
     info->percentage = (info->rpm * 100)/MAX_FAN_SPEED;
@@ -176,9 +166,7 @@ _onlp_fani_info_get_fan(int local_id, onlp_fan_info_t* info)
 static int
 _onlp_fani_info_get_fan_on_psu(int local_id, int psu_id, onlp_fan_info_t* info)
 {
-    int   fd, len, nbytes = 10;
-    char  r_data[10]   = {0};
-    char  fullpath[80] = {0};
+    int status, speed;
 
     /* get fan direction
      */
@@ -196,18 +184,15 @@ _onlp_fani_info_get_fan_on_psu(int local_id, int psu_id, onlp_fan_info_t* info)
 
     /* get fan fault status
      */
-    sprintf(fullpath, "%s%s", PREFIX_PATH_ON_PSU, fan_path[local_id].status);
-    OPEN_READ_FILE(fd,fullpath,r_data,nbytes,len);
-    info->status |= (atoi(r_data) > 0) ? ONLP_FAN_STATUS_FAILED : 0;
-
+    onlp_file_read_int(&status, "%s%s", PREFIX_PATH_ON_PSU, fan_path[local_id].status);
+    if (status > 0)
+        info->status |= ONLP_FAN_STATUS_FAILED;
     /* get fan speed
      */
-    sprintf(fullpath, "%s%s", PREFIX_PATH_ON_PSU, fan_path[local_id].speed);
-    OPEN_READ_FILE(fd,fullpath,r_data,nbytes,len);
-    info->rpm = atoi(r_data);
+    onlp_file_read_int(&speed, "%s%s", PREFIX_PATH_ON_PSU, fan_path[local_id].speed);
 
     /* get speed percentage from rpm */
-    info->percentage = (info->rpm * 100) / MAX_PSU_FAN_SPEED;
+    info->percentage = (speed * 100) / MAX_PSU_FAN_SPEED;
     info->status |= ONLP_FAN_STATUS_PRESENT;
 
     return ONLP_STATUS_OK;
@@ -265,6 +250,7 @@ onlp_fani_info_get(onlp_oid_t id, onlp_fan_info_t* info)
  *
  * It is optional if you have no fans at all with this feature.
  */
+/* MODIFY */
 int
 onlp_fani_rpm_set(onlp_oid_t id, int rpm)
 {
@@ -341,6 +327,7 @@ onlp_fani_percentage_set(onlp_oid_t id, int p)
  * Interpretation of these modes is up to the platform.
  *
  */
+/* MODIFY */
 int
 onlp_fani_mode_set(onlp_oid_t id, onlp_fan_mode_t mode)
 {
@@ -355,6 +342,7 @@ onlp_fani_mode_set(onlp_oid_t id, onlp_fan_mode_t mode)
  *
  * This function is optional unless the functionality is available.
  */
+/* MODIFY */
 int
 onlp_fani_dir_set(onlp_oid_t id, onlp_fan_dir_t dir)
 {
@@ -364,6 +352,7 @@ onlp_fani_dir_set(onlp_oid_t id, onlp_fan_dir_t dir)
 /*
  * Generic fan ioctl. Optional.
  */
+/*MODIFY */
 int
 onlp_fani_ioctl(onlp_oid_t id, va_list vargs)
 {

@@ -10,7 +10,7 @@
  * @defgroup platform_underscore platform_underscore - platform_underscore Description
  *
 
-ONLP for the Mellanox SN2700
+ONLP for the platform_underscore
 
  *
  * @{

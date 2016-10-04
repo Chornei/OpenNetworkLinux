@@ -48,7 +48,7 @@ static const int sfp_mux_index[NUM_OF_SFP_PORT] = {
 
 /* MODIFY */
 static int
-sn2700_sfp_node_read_int(char *node_path, int *value, int data_len)
+model-name_sfp_node_read_int(char *node_path, int *value, int data_len)
 {
     int ret = 0;
     char buf[8];
@@ -65,7 +65,7 @@ sn2700_sfp_node_read_int(char *node_path, int *value, int data_len)
 
 /* MODIFY */
 static char*
-sn2700_sfp_get_port_path(int port, char *node_name)
+model-name_sfp_get_port_path(int port, char *node_name)
 {
     sprintf(sfp_node_path, "/sys/bus/i2c/devices/%d-0050/%s",
                            FRONT_PORT_TO_MUX_INDEX(port),
@@ -113,9 +113,9 @@ onlp_sfpi_is_present(int port)
      * Return < 0 if error.
      */
     int present;
-    char* path = sn2700_sfp_get_port_path(port, "sfp_is_present");
+    char* path = model-name_sfp_get_port_path(port, "sfp_is_present");
 
-    if (sn2700_sfp_node_read_int(path, &present, 0) != 0) {
+    if (model-name_sfp_node_read_int(path, &present, 0) != 0) {
         AIM_LOG_ERROR("Unable to read present status from port(%d)\r\n", port);
         return ONLP_STATUS_E_INTERNAL;
     }
@@ -131,7 +131,7 @@ onlp_sfpi_presence_bitmap_get(onlp_sfp_bitmap_t* dst)
     char* path;
     FILE* fp;
 
-    path = sn2700_sfp_get_port_path(0, "sfp_is_present_all");
+    path = model-name_sfp_get_port_path(0, "sfp_is_present_all");
     fp = fopen(path, "r");
 
     if(fp == NULL) {
@@ -172,7 +172,7 @@ onlp_sfpi_presence_bitmap_get(onlp_sfp_bitmap_t* dst)
 int
 onlp_sfpi_eeprom_read(int port, uint8_t data[256])
 {
-    char* path = sn2700_sfp_get_port_path(port, "sfp_eeprom");
+    char* path = model-name_sfp_get_port_path(port, "sfp_eeprom");
 
     /*
      * Read the SFP eeprom into data[]

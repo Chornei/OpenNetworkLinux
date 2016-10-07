@@ -1,5 +1,5 @@
 #!/bin/bash
-if [ $# -eq 1 ]
+if [ $# -ne 2 ]
    then
       echo "two arguments necessary: ONIE-ID and model"
       exit 1
